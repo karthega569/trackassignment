@@ -1,0 +1,545 @@
+
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>My Assignment Tracker Dashboard</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    background: #f0f2f5;
+    color: #1f2328;
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  .header {
+    background: #1a3a6b;
+    color: #fff;
+    padding: 22px 36px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .header-left h1 {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+  }
+  .header-left p {
+    font-size: 13px;
+    color: #a8bcd8;
+    margin-top: 2px;
+  }
+  .header-right {
+    text-align: right;
+  }
+  .header-right .assignment-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #dce8f8;
+  }
+  .header-right .deadline {
+    font-size: 13px;
+    color: #fbbf24;
+    margin-top: 4px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    justify-content: flex-end;
+  }
+  .deadline-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #fbbf24;
+    display: inline-block;
+    animation: pulse 1.5s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.4; }
+  }
+
+  /* ── Container ── */
+  .container {
+    max-width: 960px;
+    margin: 28px auto;
+    padding: 0 20px;
+  }
+
+  /* ── Cards Row ── */
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    margin-bottom: 24px;
+  }
+
+  .card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 20px 22px;
+  }
+
+  .card-icon-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .card-icon {
+    width: 40px; height: 40px;
+    border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  .icon-blue  { background: #e8f0fb; }
+  .icon-green { background: #e6f5ec; }
+  .icon-red   { background: #fde8e8; }
+
+  .card-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: #57606a;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .stat-number {
+    font-size: 42px;
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .stat-number-blue  { color: #1a3a6b; }
+  .stat-number-green { color: #1a7f37; }
+  .stat-number-red   { color: #b91c1c; }
+
+  .stat-sub {
+    font-size: 12px;
+    color: #57606a;
+    margin-bottom: 12px;
+  }
+
+  .stat-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    margin-bottom: 5px;
+    color: #57606a;
+  }
+  .stat-row strong { color: #1f2328; }
+
+  .progress-bar-bg {
+    background: #e5e7eb;
+    border-radius: 99px;
+    height: 8px;
+    margin-top: 10px;
+    overflow: hidden;
+  }
+  .progress-bar-fill-green { background: #1a7f37; }
+  .progress-bar-fill-red   { background: #b91c1c; }
+  .progress-label {
+    font-size: 12px;
+    color: #57606a;
+    margin-top: 5px;
+  }
+
+  .alert-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #fde8e8;
+    color: #b91c1c;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 5px 12px;
+    border-radius: 99px;
+    margin-top: 10px;
+    border: 1px solid #fca5a5;
+  }
+
+  .mini-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 9px;
+    border-radius: 99px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .mb-green  { background: #e6f5ec; color: #1a7f37; }
+  .mb-amber  { background: #fff4e5; color: #d97706; }
+
+  /* ── Divider ── */
+  .section-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: #57606a;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #e5e7eb;
+  }
+
+  /* ── Checklist Table ── */
+  .checklist-card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 22px 24px;
+    margin-bottom: 32px;
+  }
+  .checklist-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .checklist-top h2 {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1f2328;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .summary-pill {
+    font-size: 12px;
+    color: #57606a;
+    background: #f7f8fa;
+    border: 1px solid #e5e7eb;
+    border-radius: 99px;
+    padding: 3px 14px;
+  }
+
+  /* legend */
+  .legend {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #57606a;
+  }
+  .legend-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+  }
+  .ld-green { background: #1a7f37; }
+  .ld-amber { background: #d97706; }
+  .ld-red   { background: #b91c1c; }
+
+  /* student rows */
+  .student-list { list-style: none; }
+
+  .student-row {
+    display: grid;
+    grid-template-columns: 36px 1fr auto auto auto;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    border: 1px solid transparent;
+    font-size: 13px;
+  }
+
+  .sr-submitted   { background: #f0faf3; border-color: #c6e8d0; }
+  .sr-late        { background: #fffbea; border-color: #fde68a; }
+  .sr-notsubmitted{ background: #fff5f5; border-color: #fecaca; }
+
+  .avatar {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+  }
+  .av-green { background: #1a7f37; }
+  .av-amber { background: #d97706; }
+  .av-red   { background: #b91c1c; }
+
+  .student-name {
+    font-weight: 600;
+    color: #1f2328;
+  }
+  .student-name .student-role {
+    font-size: 11px;
+    font-weight: 400;
+    color: #57606a;
+    display: block;
+  }
+
+  .status-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 11px;
+    border-radius: 99px;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .sc-green { background: #e6f5ec; color: #1a7f37; border: 1px solid #c6e8d0; }
+  .sc-amber { background: #fff4e5; color: #d97706; border: 1px solid #fde68a; }
+  .sc-red   { background: #fde8e8; color: #b91c1c; border: 1px solid #fca5a5; }
+
+  .date-cell {
+    font-size: 12px;
+    color: #57606a;
+    white-space: nowrap;
+    text-align: center;
+  }
+  .date-cell.na { color: #c0c8d8; font-style: italic; }
+
+  .marks-cell {
+    font-size: 13px;
+    font-weight: 700;
+    text-align: right;
+    white-space: nowrap;
+    min-width: 60px;
+  }
+  .marks-high   { color: #1a7f37; }
+  .marks-mid    { color: #d97706; }
+  .marks-na     { color: #c0c8d8; font-style: italic; font-weight: 400; }
+
+  /* column headers */
+  .checklist-cols {
+    display: grid;
+    grid-template-columns: 36px 1fr auto auto auto;
+    gap: 14px;
+    padding: 0 14px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #57606a;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    border-bottom: 1px solid #e5e7eb;
+    margin-bottom: 10px;
+  }
+
+  /* ── Footer ── */
+  .footer {
+    text-align: center;
+    font-size: 12px;
+    color: #57606a;
+    border-top: 1px solid #e5e7eb;
+    padding: 14px 0 20px;
+  }
+
+  @media (max-width: 700px) {
+    .cards { grid-template-columns: 1fr; }
+    .header { flex-direction: column; }
+    .header-right { text-align: left; }
+    .header-right .deadline { justify-content: flex-start; }
+    .student-row {
+      grid-template-columns: 36px 1fr;
+      grid-template-rows: auto auto;
+    }
+    .status-chip, .date-cell, .marks-cell {
+      grid-column: 2;
+      text-align: left;
+    }
+    .checklist-cols { display: none; }
+  }
+</style>
+</head>
+<body>
+
+
+<header class="header">
+  <div class="header-left">
+    <h1>📚 My Assignment Tracker Dashboard</h1>
+    <p>Assignment Submission Management</p>
+  </div>
+  <div class="header-right">
+    <div class="assignment-name">📝 Web Development — Assignment 1</div>
+    <div class="deadline">
+      <span class="deadline-dot"></span>
+      Deadline: Friday, 20 June 2025  ·  1 day left
+    </div>
+  </div>
+</header>
+
+<div class="container">
+
+  
+  <div class="cards">
+
+    
+    <div class="card">
+      <div class="card-icon-title">
+        <div class="card-icon icon-blue">🧑‍🎓</div>
+        <span class="card-title">Total Students</span>
+      </div>
+      <div class="stat-number stat-number-blue">5</div>
+      <div class="stat-sub">Web Development — Cohort A</div>
+      <div class="stat-row"><span>Assignment</span><strong>Assignment 1</strong></div>
+      <div class="stat-row"><span>Tracking Status</span><strong>Active</strong></div>
+      <div class="stat-row"><span>Submission Window</span><strong>Open</strong></div>
+    </div>
+
+    
+    <div class="card">
+      <div class="card-icon-title">
+        <div class="card-icon icon-green">✅</div>
+        <span class="card-title">Submitted</span>
+      </div>
+      <div class="stat-number stat-number-green">3</div>
+      <div class="stat-sub">out of 5 students</div>
+      <div class="stat-row"><span>Submission Rate</span><strong>60%</strong></div>
+      <div class="stat-row">
+        <span>On Time</span>
+        <span class="mini-badge mb-green">2 students</span>
+      </div>
+      <div class="stat-row">
+        <span>Late</span>
+        <span class="mini-badge mb-amber">1 student</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill-green" style="width:60%;height:100%;border-radius:99px"></div>
+      </div>
+      <div class="progress-label">60% of class submitted</div>
+    </div>
+
+    
+    <div class="card">
+      <div class="card-icon-title">
+        <div class="card-icon icon-red">❌</div>
+        <span class="card-title">Not Submitted</span>
+      </div>
+      <div class="stat-number stat-number-red">2</div>
+      <div class="stat-sub">students pending</div>
+      <div class="stat-row"><span>Pending Rate</span><strong>40%</strong></div>
+      <div class="stat-row"><span>Days Until Deadline</span><strong style="color:#b91c1c">1 day ⚠️</strong></div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill-red" style="width:40%;height:100%;border-radius:99px"></div>
+      </div>
+      <div class="progress-label" style="color:#b91c1c;font-weight:600">40% yet to submit — act now</div>
+      <div class="alert-badge">⚠️ Needs Immediate Attention</div>
+    </div>
+
+  </div>
+
+  
+  <div class="checklist-card">
+    <div class="checklist-top">
+      <h2>📋 Student Submission Checklist</h2>
+      <span class="summary-pill">5 students · 3 submitted · 2 pending</span>
+    </div>
+
+    
+    <div class="legend">
+      <div class="legend-item"><span class="legend-dot ld-green"></span> Submitted (On Time)</div>
+      <div class="legend-item"><span class="legend-dot ld-amber"></span> Submitted (Late)</div>
+      <div class="legend-item"><span class="legend-dot ld-red"></span> Not Submitted</div>
+    </div>
+
+    
+    <div class="checklist-cols">
+      <span></span>
+      <span>Student</span>
+      <span>Status</span>
+      <span style="text-align:center">Submitted On</span>
+      <span style="text-align:right">Marks</span>
+    </div>
+
+    
+    <ul class="student-list">
+
+      
+      <li class="student-row sr-submitted">
+        <div class="avatar av-green">KA</div>
+        <div class="student-name">
+          Karthega
+          <span class="student-role">Student ID: STU001</span>
+        </div>
+        <span class="status-chip sc-green">✓ On Time</span>
+        <div class="date-cell">17 Jun 2025</div>
+        <div class="marks-cell marks-high">88 / 100</div>
+      </li>
+
+      
+      <li class="student-row sr-submitted">
+        <div class="avatar av-green">AH</div>
+        <div class="student-name">
+          Ahmad
+          <span class="student-role">Student ID: STU002</span>
+        </div>
+        <span class="status-chip sc-green">✓ On Time</span>
+        <div class="date-cell">18 Jun 2025</div>
+        <div class="marks-cell marks-high">75 / 100</div>
+      </li>
+
+      
+      <li class="student-row sr-late">
+        <div class="avatar av-amber">AL</div>
+        <div class="student-name">
+          Ah Leng
+          <span class="student-role">Student ID: STU003</span>
+        </div>
+        <span class="status-chip sc-amber">⏱ Late</span>
+        <div class="date-cell">19 Jun 2025</div>
+        <div class="marks-cell marks-mid">65 / 100</div>
+      </li>
+
+      
+      <li class="student-row sr-notsubmitted">
+        <div class="avatar av-red">BA</div>
+        <div class="student-name">
+          Baba
+          <span class="student-role">Student ID: STU004</span>
+        </div>
+        <span class="status-chip sc-red">✕ Not Submitted</span>
+        <div class="date-cell na">— pending —</div>
+        <div class="marks-cell marks-na">—</div>
+      </li>
+
+      
+      <li class="student-row sr-notsubmitted">
+        <div class="avatar av-red">PA</div>
+        <div class="student-name">
+          Papa
+          <span class="student-role">Student ID: STU005</span>
+        </div>
+        <span class="status-chip sc-red">✕ Not Submitted</span>
+        <div class="date-cell na">— pending —</div>
+        <div class="marks-cell marks-na">—</div>
+      </li>
+
+    </ul>
+  </div>
+
+</div>
+
+
+<footer class="footer">
+  Made with IBM Bob
+</footer>
+
+</body>
+</html>
